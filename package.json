@@ -1,0 +1,38 @@
+{
+  "name": "@spaceteams/clean-architecture-inspired-react-template",
+  "repository": "https://github.com/spaceteams/clean-architecture-inspired-react-template",
+  "private": true,
+  "version": "0.0.1",
+  "description": "A template for setting up a clean architecture-inspired React application with MVVM",
+  "license": "MIT",
+  "author": "info@spaceteams.de",
+  "main": "src/main.tsx",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint . --report-unused-disable-directives",
+    "preview": "vite preview",
+    "format": "eslint . --fix",
+    "prepare": "husky install"
+  },
+  "dependencies": {
+    "awilix": "8.0.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-router-dom": "6.21.1"
+  },
+  "devDependencies": {
+    "@stylistic/eslint-plugin": "1.5.1",
+    "@types/react": "18.2.45",
+    "@types/react-dom": "18.2.18",
+    "@typescript-eslint/eslint-plugin": "6.15.0",
+    "@typescript-eslint/parser": "6.15.0",
+    "@vitejs/plugin-react": "4.2.1",
+    "eslint": "8.56.0",
+    "eslint-plugin-react-hooks": "4.6.0",
+    "eslint-plugin-react-refresh": "0.4.5",
+    "husky": "8.0.3",
+    "typescript": "5.3.3",
+    "vite": "4.5.1"
+  }
+}
