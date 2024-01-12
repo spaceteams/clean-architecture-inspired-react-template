@@ -1,15 +1,16 @@
 import { FC } from 'react'
 import { Todo } from '../../../../domain/model/Todo.ts'
 import { ListItem } from '../../atoms/ListItem/ListItem.tsx'
+import { Content } from '../../atoms/PageContent/Content.tsx'
 
-type Props = {
+type ListProps = {
   readonly items: Todo[]
   readonly onItemClick: (item: Todo) => void
   readonly onItemDelete: (item: Todo) => void
 }
 
-export const List: FC<Props> = ({ items, onItemClick, onItemDelete }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', rowGap: '0.25rem' }}>
+export const List: FC<ListProps> = ({ items, onItemClick, onItemDelete }) => (
+  <Content>
     {items.map(item => (
       <ListItem
         key={item.id}
@@ -17,5 +18,5 @@ export const List: FC<Props> = ({ items, onItemClick, onItemDelete }) => (
         onClick={() => onItemClick(item)}
         onDelete={() => onItemDelete(item)} />
     ))}
-  </div>
+  </Content>
 )

@@ -8,20 +8,22 @@
   "author": "info@spaceteams.de",
   "main": "src/main.tsx",
   "scripts": {
+    "prepare": "husky install",
+    "format": "eslint . --fix",
+    "lint": "eslint . --report-unused-disable-directives",
     "dev": "vite",
     "build": "tsc && vite build",
-    "lint": "eslint . --report-unused-disable-directives",
-    "preview": "vite preview",
-    "format": "eslint . --fix",
-    "prepare": "husky install"
+    "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "11.11.3",
     "awilix": "8.0.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-router-dom": "6.21.1"
   },
   "devDependencies": {
+    "@emotion/babel-plugin": "11.11.0",
     "@stylistic/eslint-plugin": "1.5.1",
     "@types/react": "18.2.45",
     "@types/react-dom": "18.2.18",

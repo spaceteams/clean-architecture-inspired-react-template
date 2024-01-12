@@ -1,3 +1,4 @@
+import { css } from '@emotion/react'
 import { FC } from 'react'
 
 type Props = {
@@ -5,7 +6,11 @@ type Props = {
 }
 
 export const Header: FC<Props> = ({ title }) => (
-  <h2>
+  <h2 css={styles.header}>
     {title}
   </h2>
 )
+
+const styles = {
+  header: css({ marginBottom: '2rem' }),
+}

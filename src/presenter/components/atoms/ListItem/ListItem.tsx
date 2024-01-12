@@ -1,3 +1,4 @@
+import { css } from '@emotion/react'
 import { FC, MouseEvent } from 'react'
 
 // eslint-disable-next-line @stylistic/max-len
@@ -17,24 +18,28 @@ export const ListItem: FC<Props> = ({ title, onClick, onDelete }) => {
   }
 
   return (
-    <div
-      style={
-        {
-          display: 'flex',
-          flexDirection: 'row',
-          columnGap: '0.5rem',
-          border: '1px solid black',
-          padding: '0.25rem',
-          borderRadius: '0.25rem',
-          cursor: 'pointer',
-        }
-      }
-      onClick={() => onClick()}>
-      <div style={{ flex: '1 1 auto' }}>
+    <div css={styles.wrapper} onClick={() => onClick()}>
+      <div css={styles.title}>
         {title}
       </div>
 
-      <img style={{ width: '1rem', height: 'auto' }} src={TRASH_ICON} alt="delete" onClick={handleDelete} />
+      <img css={styles.icon} src={TRASH_ICON} alt="delete" onClick={handleDelete} />
     </div>
   )
+}
+
+const styles = {
+  wrapper: css({
+    height: '2.5rem',
+    lineHeight: '2.5rem',
+    display: 'flex',
+    flexDirection: 'row',
+    columnGap: '0.5rem',
+    border: '1px solid black',
+    padding: '0.75rem',
+    borderRadius: '0.25rem',
+    cursor: 'pointer',
+  }),
+  title: css({ flex: '1 1 auto', fontSize: '1.5em' }),
+  icon: css({ width: '1.5rem', height: 'auto' }),
 }

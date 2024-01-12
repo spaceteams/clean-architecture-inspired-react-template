@@ -1,13 +1,14 @@
-import { CSSProperties, FC } from 'react'
+import { SerializedStyles } from '@emotion/react'
+import { FC } from 'react'
 
 type Props = {
-  readonly style?: CSSProperties
+  readonly customStyles?: SerializedStyles
   readonly label: string
   readonly onClick: () => void
 }
 
-export const Button: FC<Props> = ({ style, label, onClick }) => (
-  <button style={{ ...style, padding: '0.25rem', textAlign: 'center' }} onClick={() => onClick()}>
+export const Button: FC<Props> = ({ customStyles, label, onClick }) => (
+  <button css={customStyles} onClick={() => onClick()}>
     {label}
   </button>
 )

@@ -18,8 +18,6 @@ export const deleteOne = async(id: Id): Promise<void> => {
   localStorage.setItem(COLLECTION_NAME, JSON.stringify(todos))
 }
 
-deleteOne('111')
-
 export const getOne = async(id: Id): Promise<Todo> => {
   const todos = await getAll()
   const todo = todos.find(({ id: todoId }) => todoId === id)
