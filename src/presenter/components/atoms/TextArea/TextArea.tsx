@@ -1,5 +1,6 @@
 import { css, SerializedStyles } from '@emotion/react'
 import { FC } from 'react'
+import { borderRadius, color, flex1, fontSize } from '../../../styles'
 
 type Props = {
   readonly customStyles?: SerializedStyles
@@ -25,14 +26,19 @@ export const TextArea: FC<Props> = ({ customStyles, label, value, onChange }) =>
 const styles = {
   wrapper: css({ display: 'flex', flexDirection: 'column', rowGap: '0.5rem' }),
   label: css({ textAlign: 'start' }),
-  textArea: css({
-    flex: '1 1 auto',
-    minHeight: '2.5rem',
-    lineHeight: '2.5rem',
-    borderRadius: '0.25rem',
-    resize: 'none',
-    border: '1px solid rgb(26, 26, 26)',
-    padding: '0.75rem',
-    fontSize: '1.5rem',
-  }),
+  textArea: css([
+    flex1,
+    {
+      minHeight: '2.5rem',
+      lineHeight: '2.5rem',
+      borderRadius: borderRadius.small,
+      resize: 'none',
+      border: `1px solid ${color.border}`,
+      padding: '0.75rem',
+      fontSize: fontSize.text,
+      '&:not(:focus):hover': {
+        backgroundColor: color.backgroundLight,
+      },
+    },
+  ]),
 }

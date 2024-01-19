@@ -13,6 +13,7 @@ export const todoDetailsViewModel = ({ getTodoUseCase, updateTodoUseCase, delete
   const { id } = useParams()
   const navigate = useNavigate()
 
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
 
@@ -42,5 +43,14 @@ export const todoDetailsViewModel = ({ getTodoUseCase, updateTodoUseCase, delete
     }
   }, [id])
 
-  return { title, setTitle, description, setDescription, updateTodo, deleteTodo }
+  return {
+    title,
+    setTitle,
+    description,
+    setDescription,
+    updateTodo,
+    deleteTodo,
+    isDeleteDialogOpen,
+    setIsDeleteDialogOpen,
+  }
 }

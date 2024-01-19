@@ -1,7 +1,7 @@
 import { FC } from 'react'
 import { Todo } from '../../../../domain/model/Todo.ts'
+import { Content } from '../../atoms/Content/Content.tsx'
 import { ListItem } from '../../atoms/ListItem/ListItem.tsx'
-import { Content } from '../../atoms/PageContent/Content.tsx'
 
 type ListProps = {
   readonly items: Todo[]

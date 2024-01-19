@@ -1,20 +1,28 @@
 import { css } from '@emotion/react'
-import { FC, PropsWithChildren } from 'react'
+import { FC, PropsWithChildren, ReactNode } from 'react'
 import { fullWidthAndHeight } from '../../../styles'
+import { Footer } from '../../atoms/Footer/Footer.tsx'
 import { Header } from '../../atoms/Header/Header.tsx'
-import { Content } from '../../atoms/PageContent/Content.tsx'
+import { Content } from '../../atoms/Content/Content.tsx'
 
 type PageProps = {
   readonly headline: string
+  readonly footer?: ReactNode
 }
 
-export const Page: FC<PropsWithChildren<PageProps>> = ({ headline, children }) => (
+export const Page: FC<PropsWithChildren<PageProps>> = ({ headline, footer, children }) => (
   <div css={styles.page}>
     <Header title={headline} />
 
     <Content>
       {children}
     </Content>
+
+    {footer && (
+      <Footer>
+        {footer}
+      </Footer>
+    )}
   </div>
 )
 

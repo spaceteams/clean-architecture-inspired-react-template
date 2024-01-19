@@ -2,9 +2,8 @@ import { css, Global } from '@emotion/react'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { App } from './App.tsx'
-import { colors } from './presenter/styles'
+import { absolutePosition, borderRadius, color, fontSize } from './presenter/styles'
 
-// TODO: Clean up styling (move re-used stylings into styles/index.ts)
 // TODO: Clean-up and refactor code
 // TODO: Setup tests
 // TODO: Update README (Explain Structure & Components, Add link to code.talks video)
@@ -16,18 +15,12 @@ const styles = {
       fontWeight: 400,
       lineHeight: 1.5,
       fontStyle: 'normal',
-      background: 'white',
-      color: colors.text,
+      backgroundColor: 'white',
+      color: color.text,
     },
   }),
   root: css({
-    '#root': {
-      position: 'absolute',
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: 0,
-    },
+    '#root': absolutePosition,
   }),
   textInputs: css({
     'input, textarea': {
@@ -43,10 +36,10 @@ const styles = {
       fontWeight: 'inherit',
     },
     'h2': {
-      fontSize: 60,
+      fontSize: fontSize.heading1,
     },
     'h6': {
-      fontSize: 20,
+      fontSize: fontSize.heading2,
     },
   }),
   button: css({
@@ -55,14 +48,14 @@ const styles = {
       height: '2.5em',
       padding: '0.5em',
       textAlign: 'center',
-      fontSize: '1.5em',
-      borderRadius: '0.5em',
+      fontSize: fontSize.text,
+      borderRadius: borderRadius.normal,
       border: 0,
       cursor: 'pointer',
       color: 'white',
-      backgroundColor: colors.backgroundDark,
+      backgroundColor: color.backgroundDark,
       '&:hover': {
-        backgroundColor: colors.backgroundDarkLight,
+        backgroundColor: color.backgroundDarkLight,
       },
     },
   }),
@@ -72,5 +65,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Global styles={[styles.body, styles.root, styles.textInputs, styles.headlines, styles.button]} />
     <App />
+    <div id="portal-root" />
   </React.StrictMode>,
 )

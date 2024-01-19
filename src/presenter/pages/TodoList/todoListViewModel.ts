@@ -8,16 +8,24 @@ type Dependencies = {
 }
 
 export const todoListViewModel = ({ getTodosUseCase, deleteTodoUseCase }: Dependencies) => {
+  const [todoToDelete, setTodoToDelete] = useState<Todo>()
   const [todos, setTodos] = useState<Todo[]>([])
+
+  const showDeleteDialog = (todo: Todo) => setTodoToDelete(todo)
+
+  const closeDeleteDialog = () => setTodoToDelete(undefined)
 
   const getTodos = async() => {
     const result = await getTodosUseCase.execute()
     setTodos(result)
   }
 
-  const deleteTodo = async(id: Id) => {
-    await deleteTodoUseCase.execute(id)
-    setTodos(todos.filter(todo => todo.id !== id))
+  const deleteTodo = async() => {
+    if (todoToDelete !== undefined) {
+      await deleteTodoUseCase.execute(todoToDelete.id)
+      setTodos(todos.filter(todo => todo.id !== todoToDelete.id))
+      closeDeleteDialog()
+    }
   }
 
   const sortById = (prevTodo: Todo, todo: Todo) => prevTodo.id < todo.id ? -1 : prevTodo.id > todo.id ? 1 : 0
@@ -26,5 +34,5 @@ export const todoListViewModel = ({ getTodosUseCase, deleteTodoUseCase }: Depend
     void getTodos()
   }, [])
 
-  return { todos: todos.sort(sortById), deleteTodo }
+  return { todos: todos.sort(sortById), deleteTodo, showDeleteDialog, closeDeleteDialog, todoToDelete }
 }

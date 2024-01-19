@@ -1,6 +1,7 @@
 import { css, SerializedStyles } from '@emotion/react'
 import { Property } from 'csstype'
 import { FC, PropsWithChildren } from 'react'
+import { flex1 } from '../../../styles'
 
 type ContentProps = {
   readonly customStyles?: SerializedStyles
@@ -14,5 +15,5 @@ export const Content: FC<PropsWithChildren<ContentProps>> = ({ direction = 'colu
 )
 
 const styles = {
-  wrapper: css({ flex: '1 1 auto', display: 'flex', gap: '1rem' }),
+  wrapper: css([flex1, { display: 'flex', gap: '1rem' }]),
 }

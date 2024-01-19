@@ -2,7 +2,7 @@ import { SerializedStyles } from '@emotion/react'
 import { FC } from 'react'
 
 type Props = {
-  readonly customStyles?: SerializedStyles
+  readonly customStyles?: SerializedStyles | SerializedStyles[]
   readonly label: string
   readonly onClick: () => void
 }

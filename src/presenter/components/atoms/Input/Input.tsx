@@ -1,5 +1,6 @@
 import { css } from '@emotion/react'
 import { FC } from 'react'
+import { borderRadius, color, fontSize } from '../../../styles'
 
 type Props = {
   readonly label: string
@@ -24,9 +25,12 @@ const styles = {
   input: css({
     height: '2.5rem',
     lineHeight: '2.5rem',
-    borderRadius: '0.25rem',
-    border: '1px solid rgb(26, 26, 26)',
+    borderRadius: borderRadius.small,
+    border: `1px solid ${color.border}`,
     padding: '0.75rem',
-    fontSize: '1.5rem',
+    fontSize: fontSize.text,
+    '&:not(:focus):hover': {
+      backgroundColor: color.backgroundLight,
+    },
   }),
 }
