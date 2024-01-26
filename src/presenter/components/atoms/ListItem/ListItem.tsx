@@ -16,15 +16,13 @@ export const ListItem: FC<Props> = ({ title, onClick, onDelete }) => {
   }
 
   return (
-    <>
-      <div css={styles.wrapper} onClick={() => onClick()}>
-        <div css={styles.title}>
-          {title}
-        </div>
-
-        <TrashIcon css={styles.icon} onClick={handleDelete} />
+    <div data-testid="list-item" css={styles.wrapper} onClick={() => onClick()}>
+      <div css={styles.title}>
+        {title}
       </div>
-    </>
+
+      <TrashIcon css={styles.icon} onClick={handleDelete} />
+    </div>
   )
 }
 

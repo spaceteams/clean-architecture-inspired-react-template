@@ -9,7 +9,7 @@ type ContentProps = {
 }
 
 export const Content: FC<PropsWithChildren<ContentProps>> = ({ direction = 'column', customStyles, children }) => (
-  <div css={[styles.wrapper, { flexDirection: direction }, customStyles]}>
+  <div data-testid="content" css={[styles.wrapper, { flexDirection: direction }, customStyles]}>
     {children}
   </div>
 )

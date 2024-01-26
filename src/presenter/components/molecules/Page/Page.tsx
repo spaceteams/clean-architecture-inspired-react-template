@@ -11,7 +11,7 @@ type PageProps = {
 }
 
 export const Page: FC<PropsWithChildren<PageProps>> = ({ headline, footer, children }) => (
-  <div css={styles.page}>
+  <div data-testid="page" css={styles.page}>
     <Header title={headline} />
 
     <Content>

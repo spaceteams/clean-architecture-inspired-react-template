@@ -4,8 +4,9 @@ import ReactDOM from 'react-dom/client'
 import { App } from './App.tsx'
 import { absolutePosition, borderRadius, color, fontSize } from './presenter/styles'
 
-// TODO: Clean-up and refactor code
 // TODO: Setup tests
+// TODO --> github workflows aufsetzen --> Bei PR immer tests laufen lassen!
+// TODO: Check if code need further clean-up and refactor
 // TODO: Update README (Explain Structure & Components, Add link to code.talks video)
 
 const styles = {

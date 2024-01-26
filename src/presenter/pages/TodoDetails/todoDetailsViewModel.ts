@@ -6,7 +6,7 @@ import { Id, UseCaseWithParams } from '../../../domain/model/types'
 type Dependencies = {
   readonly getTodoUseCase: UseCaseWithParams<Todo, Id>
   readonly updateTodoUseCase: UseCaseWithParams<Todo, Todo>
-  readonly deleteTodoUseCase: UseCaseWithParams<Todo[], Id>
+  readonly deleteTodoUseCase: UseCaseWithParams<void, Id>
 }
 
 export const todoDetailsViewModel = ({ getTodoUseCase, updateTodoUseCase, deleteTodoUseCase }: Dependencies) => {
@@ -17,20 +17,20 @@ export const todoDetailsViewModel = ({ getTodoUseCase, updateTodoUseCase, delete
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
 
-  const getAndSetTodo = async(todoId: Id) => {
+  const getAndSetTodo = async (todoId: Id) => {
     const todo = await getTodoUseCase.execute(todoId)
     setTitle(todo.title)
     setDescription(todo.description)
   }
 
-  const updateTodo = async() => {
+  const updateTodo = async () => {
     if (id !== undefined) {
       await updateTodoUseCase.execute({ id, title, description })
       navigate('/')
     }
   }
 
-  const deleteTodo = async() => {
+  const deleteTodo = async () => {
     if (id !== undefined) {
       await deleteTodoUseCase.execute(id)
       navigate('/')

@@ -32,7 +32,7 @@ module.exports = {
     '@stylistic/space-unary-ops': ['error'],
     '@stylistic/space-infix-ops': ['error'],
     '@stylistic/space-in-parens': ['error'],
-    '@stylistic/space-before-function-paren': ['error', 'never'],
+    '@stylistic/space-before-function-paren': ['error', { anonymous: "never", named: "never", asyncArrow: "always" }],
     '@stylistic/space-before-blocks': ['error'],
     '@stylistic/arrow-spacing': ['error'],
     '@stylistic/rest-spread-spacing': ['error'],

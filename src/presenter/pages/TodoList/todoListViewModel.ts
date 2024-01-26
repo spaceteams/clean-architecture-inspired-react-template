@@ -4,7 +4,7 @@ import { Id, UseCase, UseCaseWithParams } from '../../../domain/model/types'
 
 type Dependencies = {
   readonly getTodosUseCase: UseCase<Todo[]>
-  readonly deleteTodoUseCase: UseCaseWithParams<Todo[], Id>
+  readonly deleteTodoUseCase: UseCaseWithParams<void, Id>
 }
 
 export const todoListViewModel = ({ getTodosUseCase, deleteTodoUseCase }: Dependencies) => {
@@ -15,12 +15,12 @@ export const todoListViewModel = ({ getTodosUseCase, deleteTodoUseCase }: Depend
 
   const closeDeleteDialog = () => setTodoToDelete(undefined)
 
-  const getTodos = async() => {
+  const getTodos = async () => {
     const result = await getTodosUseCase.execute()
     setTodos(result)
   }
 
-  const deleteTodo = async() => {
+  const deleteTodo = async () => {
     if (todoToDelete !== undefined) {
       await deleteTodoUseCase.execute(todoToDelete.id)
       setTodos(todos.filter(todo => todo.id !== todoToDelete.id))

@@ -16,7 +16,7 @@ export const Dialog: FC<DialogProps> = ({ open, title, description, onConfirm, o
   <Portal>
     {open && (
       <Overlay onClick={onClose}>
-        <div css={styles.dialog} onClick={evt => evt.stopPropagation()}>
+        <div data-testid="dialog" css={styles.dialog} onClick={evt => evt.stopPropagation()}>
           <h6 css={styles.title}>
             {title}
           </h6>

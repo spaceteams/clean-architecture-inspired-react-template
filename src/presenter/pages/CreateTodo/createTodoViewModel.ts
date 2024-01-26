@@ -13,7 +13,7 @@ export const createTodoViewModel = ({ createTodoUseCase }: Dependencies) => {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
 
-  const createTodo = async() => {
+  const createTodo = async () => {
     await createTodoUseCase.execute({ title, description })
     setTitle('')
     setDescription('')
