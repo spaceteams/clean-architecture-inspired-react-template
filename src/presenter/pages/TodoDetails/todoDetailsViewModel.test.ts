@@ -24,7 +24,7 @@ test('should set initial title and description', async () => {
   })
 })
 
-test('should set title and description', async () => {
+test('should update title and description', async () => {
   // given
   const { result } = renderHook(() => todoDetailsViewModel({ getTodoUseCase, updateTodoUseCase, deleteTodoUseCase }))
 

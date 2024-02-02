@@ -15,7 +15,7 @@ export const todoRepository = ({ todoDataSource }: Dependencies): ITodoRepositor
     todoDataSource.createOne({ title, description })
 
   const update = (id: Id, title: string, description: string) =>
-    todoDataSource.updateOne({ id, title, description })
+    todoDataSource.updateOne(id, { title, description })
 
   const deleteTodo = (id: Id) => todoDataSource.deleteOne(id)
 

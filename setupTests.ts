@@ -4,7 +4,7 @@ import { cleanup } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 
 beforeEach(() => {
-  vi.spyOn(Router, 'useNavigate').mockReturnValue(() => vi.fn())
+  vi.spyOn(Router, 'useNavigate').mockReturnValue(vi.fn())
 })
 
 afterEach(() => {

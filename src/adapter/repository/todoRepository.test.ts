@@ -85,7 +85,7 @@ test('should update todo', async () => {
 
   // then
   expect(result).toEqual(todo)
-  expect(updateOneSpy).toHaveBeenCalledWith(todo)
+  expect(updateOneSpy).toHaveBeenCalledWith(todo.id, { title: todo.title, description: todo.description })
 })
 
 test('should return an error if updating an todo fails', async () => {
