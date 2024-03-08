@@ -25,8 +25,7 @@ Here is a recording of the conference talk:
 
 [![https://www.youtube.com/watch?v=v3HkasWQppk](https://img.youtube.com/vi/v3HkasWQppk/0.jpg)](https://www.youtube.com/watch?v=v3HkasWQppk)
 
-You can find the slides on the homepage of
-code.talks [here](https://codetalks.de/storage/files/slides/1696_de21819419e395eb58723114080ed621.pdf).
+The slides are available [here](./slides/Developing%20a%20clean%20architecture-inspired%20React%20application%20with%20MVVM.pdf).
 
 We also plan to release a blog post based on the conference talk. Once it's published, we will provide the link here.
 
