@@ -48,25 +48,30 @@ test('should open delete dialog by setting the todo to delete', async () => {
   const { result } = renderHook(() => todoListViewModel({ getTodosUseCase, deleteTodoUseCase }))
 
   // when
-  await act(() => result.current.showDeleteDialog(todos[0]))
+  act(() => result.current.showDeleteDialog(todos[0]))
 
   // then
-  expect(result.current.todoToDelete).toEqual(todos[0])
+  await waitFor(() => {
+    expect(result.current.todoToDelete).toEqual(todos[0])
+  })
 })
 
 test('should close delete dialog by resetting the todo to delete', async () => {
   // given / when
   const { result } = renderHook(() => todoListViewModel({ getTodosUseCase, deleteTodoUseCase }))
 
-  // ensure a todo was marked for being deleted
-  await act(() => result.current.showDeleteDialog(todos[0]))
-  expect(result.current.todoToDelete).toEqual(todos[0])
+  act(() => result.current.showDeleteDialog(todos[0]))
+  await waitFor(() => {
+    expect(result.current.todoToDelete).toEqual(todos[0])
+  })
 
   // when
-  await act(() => result.current.closeDeleteDialog())
+  act(() => result.current.closeDeleteDialog())
 
   // then
-  expect(result.current.todoToDelete).toBeUndefined()
+  await waitFor(() => {
+    expect(result.current.todoToDelete).toBeUndefined()
+  })
 })
 
 test('should delete a todo, close the delete dialog by resetting the todo to delete and update the todo list',
@@ -77,7 +82,10 @@ test('should delete a todo, close the delete dialog by resetting the todo to del
     const { result } = renderHook(() => todoListViewModel({ getTodosUseCase, deleteTodoUseCase }))
 
     // when
-    await act(() => result.current.showDeleteDialog(todos[0]))
+    act(() => result.current.showDeleteDialog(todos[0]))
+    await waitFor(() => {
+      expect(result.current.todoToDelete).toEqual(todos[0])
+    })
     await act(() => result.current.deleteTodo())
 
     // then
