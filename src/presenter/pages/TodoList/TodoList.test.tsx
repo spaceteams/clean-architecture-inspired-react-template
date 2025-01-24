@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import * as Router from 'react-router'
+import * as Router from 'react-router-dom'
 import { beforeEach, expect, test, vi } from 'vitest'
 import { TodoList } from './TodoList.tsx'
 

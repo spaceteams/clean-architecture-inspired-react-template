@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
-import * as Router from 'react-router'
+import * as Router from 'react-router-dom'
 import { expect, test, vi } from 'vitest'
 import { Todo } from '../../../domain/model/Todo.ts'
 import { Id, UseCaseWithParams } from '../../../domain/model/types'
@@ -66,6 +66,34 @@ test('should open delete dialog', async () => {
   })
 })
 
+test('should not call update use case if no todo is available', async () => {
+  // given
+  vi.spyOn(Router, 'useParams').mockReturnValue({ id: undefined })
+  const updateTodoSpy = vi.spyOn(updateTodoUseCase, 'execute')
+
+  const { result } = renderHook(() => todoDetailsViewModel({ getTodoUseCase, updateTodoUseCase, deleteTodoUseCase }))
+
+  // when
+  await act(() => result.current.updateTodo())
+
+  // then
+  expect(updateTodoSpy).not.toHaveBeenCalled()
+})
+
+test('should not call delete use case if no todo is available', async () => {
+  // given
+  vi.spyOn(Router, 'useParams').mockReturnValue({ id: undefined })
+  const deleteTodoSpy = vi.spyOn(deleteTodoUseCase, 'execute')
+
+  const { result } = renderHook(() => todoDetailsViewModel({ getTodoUseCase, updateTodoUseCase, deleteTodoUseCase }))
+
+  // when
+  await act(() => result.current.deleteTodo())
+
+  // then
+  expect(deleteTodoSpy).not.toHaveBeenCalled()
+})
+
 test('should update todo', async () => {
   // given
   const todo = { id: '1', title: 'Todo', description: 'description' }
@@ -94,20 +122,6 @@ test('should update todo', async () => {
   expect(updateTodoSpy).toHaveBeenCalledWith(updatedTodo)
 })
 
-test('should not call update use case if no todo is available', async () => {
-  // given
-  vi.spyOn(Router, 'useParams').mockReturnValue({ id: undefined })
-  const updateTodoSpy = vi.spyOn(updateTodoUseCase, 'execute')
-
-  const { result } = renderHook(() => todoDetailsViewModel({ getTodoUseCase, updateTodoUseCase, deleteTodoUseCase }))
-
-  // when
-  await act(() => result.current.updateTodo())
-
-  // then
-  expect(updateTodoSpy).not.toHaveBeenCalled()
-})
-
 test('should delete todo', async () => {
   // given
   const todo = { id: '1', title: 'Todo', description: 'description' }
@@ -131,18 +145,4 @@ test('should delete todo', async () => {
 
   // then
   expect(deleteTodoSpy).toHaveBeenCalledWith(todo.id)
-})
-
-test('should not call delete use case if no todo is available', async () => {
-  // given
-  vi.spyOn(Router, 'useParams').mockReturnValue({ id: undefined })
-  const deleteTodoSpy = vi.spyOn(deleteTodoUseCase, 'execute')
-
-  const { result } = renderHook(() => todoDetailsViewModel({ getTodoUseCase, updateTodoUseCase, deleteTodoUseCase }))
-
-  // when
-  await act(() => result.current.deleteTodo())
-
-  // then
-  expect(deleteTodoSpy).not.toHaveBeenCalled()
 })

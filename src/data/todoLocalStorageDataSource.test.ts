@@ -39,7 +39,7 @@ test('should return error when fetching all if todos are malformed', async () =>
   localStorage.setItem('todos', '{')
 
   // when / then
-  await expect(getAll()).rejects.toThrow('Unexpected end of JSON input')
+  await expect(getAll()).rejects.toThrow(SyntaxError)
 })
 
 test("should return todo by it's id", async () => {

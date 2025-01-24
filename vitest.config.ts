@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import svgr from 'vite-plugin-svgr'
 
 export default defineConfig({
