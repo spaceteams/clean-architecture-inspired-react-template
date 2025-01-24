@@ -1,12 +1,18 @@
-import * as Router from 'react-router'
-import { afterEach, beforeEach, vi } from 'vitest'
 import { cleanup } from '@testing-library/react'
+import { afterEach, vi } from 'vitest'
 import '@testing-library/jest-dom/vitest'
 
-beforeEach(() => {
-  vi.spyOn(Router, 'useNavigate').mockReturnValue(vi.fn())
+export const useNavigateMock = vi.fn()
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom')
+  return {
+    ...actual,
+    useNavigate: () => useNavigateMock,
+  }
 })
 
 afterEach(() => {
   cleanup()
+  useNavigateMock.mockReset()
 })

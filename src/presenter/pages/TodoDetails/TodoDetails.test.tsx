@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { expect, test, vi } from 'vitest'
 import { TodoDetails } from './TodoDetails.tsx'
-import * as Router from 'react-router'
+import * as Router from 'react-router-dom'
 
 const todo = { id: '1', title: 'test-title', description: 'test-description' }
 
@@ -45,6 +45,7 @@ test('should display the title and description of the todo', async () => {
   // then
   await waitFor(() => {
     const inputs = screen.getAllByRole<HTMLInputElement | HTMLTextAreaElement>('textbox')
+    expect(inputs).toHaveLength(2)
     expect(inputs[0].value).toEqual('test-title')
     expect(inputs[1].value).toEqual('test-description')
   })
