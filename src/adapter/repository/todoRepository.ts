@@ -1,23 +1,54 @@
-import { ITodoLocalStorageDataSource } from '../../domain/data/ITodoLocalStorageDataSource.ts'
+import { Todo } from '../../domain/model/Todo.ts'
 import { Id } from '../../domain/model/types'
 import { ITodoRepository } from '../../domain/repository/ITodoRepository.ts'
 
-type Dependencies = {
-  readonly todoDataSource: ITodoLocalStorageDataSource
-}
+export const todoRepository = (): ITodoRepository => {
+  const COLLECTION_NAME: string = 'todos'
 
-export const todoRepository = ({ todoDataSource }: Dependencies): ITodoRepository => {
-  const get = () => todoDataSource.getAll()
+  const get = (): Promise<Todo[]> => {
+    try {
+      const result = localStorage.getItem(COLLECTION_NAME)
+      return result !== null ? JSON.parse(result) : []
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
 
-  const getById = (id: Id) => todoDataSource.getOne(id)
+  const getById = async (id: Id): Promise<Todo> => {
+    const todos = await get()
+    const todo = todos.find(({ id: todoId }) => todoId === id)
 
-  const create = (title: string, description: string) =>
-    todoDataSource.createOne({ title, description })
+    if (todo === undefined) {
+      throw Error(`Could not find todo with id ${id}`)
+    }
+    return todo
+  }
 
-  const update = (id: Id, title: string, description: string) =>
-    todoDataSource.updateOne(id, { title, description })
+  const create = async (title: string, description: string): Promise<Todo> => {
+    const todos = await get()
 
-  const deleteTodo = (id: Id) => todoDataSource.deleteOne(id)
+    const id = `${Date.now()}`
+    const newTodo: Todo = { title, description, id }
+
+    localStorage.setItem(COLLECTION_NAME, JSON.stringify([...todos, newTodo]))
+
+    return newTodo
+  }
+
+  const update = async (id: Id, title: string, description: string): Promise<Todo> => {
+    const updatedTodo = { ...await getById(id), title, description }
+    const todos = (await get()).filter(({ id: todoId }) => todoId !== id)
+
+    localStorage.setItem(COLLECTION_NAME, JSON.stringify([...todos, updatedTodo]))
+
+    return updatedTodo
+  }
+
+  const deleteTodo = async (id: Id): Promise<void> => {
+    const todos = (await get()).filter(({ id: todoId }) => todoId !== id)
+
+    localStorage.setItem(COLLECTION_NAME, JSON.stringify(todos))
+  }
 
   return { get, getById, create, update, delete: deleteTodo }
 }

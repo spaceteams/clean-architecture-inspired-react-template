@@ -1,6 +1,5 @@
-import { asFunction, asValue, createContainer } from 'awilix'
+import { asFunction, createContainer } from 'awilix'
 import { todoRepository } from '../adapter/repository/todoRepository.ts'
-import * as TodoLocalStorageDataSource from '../data/todoLocalStorageDataSource.ts'
 import { createTodoUseCase } from '../domain/useCases/todo/createTodoUseCase.ts'
 import { deleteTodoUseCase } from '../domain/useCases/todo/deleteTodoUseCase.ts'
 import { getTodosUseCase } from '../domain/useCases/todo/getTodosUseCase.ts'
@@ -14,7 +13,6 @@ const container = createContainer()
 
 container.register({
   todoRepository: asFunction(todoRepository),
-  todoDataSource: asValue(TodoLocalStorageDataSource),
   todoListViewModel: asFunction(todoListViewModel),
   createTodoViewModel: asFunction(createTodoViewModel),
   todoDetailsViewModel: asFunction(todoDetailsViewModel),
