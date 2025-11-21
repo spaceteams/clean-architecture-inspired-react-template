@@ -13,6 +13,7 @@ const getTodosUseCase = { execute: () => Promise.resolve() } as unknown as UseCa
 const deleteTodoUseCase = { execute: () => Promise.resolve() } as unknown as UseCaseWithParams<void, Id>
 
 beforeEach(() => {
+  vi.clearAllMocks()
   vi.spyOn(getTodosUseCase, 'execute').mockReturnValue(Promise.resolve(todos))
 })
 

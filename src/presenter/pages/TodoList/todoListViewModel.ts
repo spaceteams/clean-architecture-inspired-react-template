@@ -23,7 +23,7 @@ export const todoListViewModel = ({ getTodosUseCase, deleteTodoUseCase }: Depend
   const deleteTodo = async () => {
     if (todoToDelete !== undefined) {
       await deleteTodoUseCase.execute(todoToDelete.id)
-      setTodos(todos.filter(todo => todo.id !== todoToDelete.id))
+      setTodos(currentTodos => currentTodos.filter(todo => todo.id !== todoToDelete.id))
       closeDeleteDialog()
     }
   }
