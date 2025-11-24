@@ -1,19 +1,28 @@
 import { render, screen } from '@testing-library/react'
-import { expect, test } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { Header } from './Header.tsx'
 
-test('should render component', () => {
-  // given / when
-  render(<Header title="" />)
+describe('Header', () => {
+  it.each([
+    ['Todo List'],
+    ['My Tasks'],
+    ['Welcome Back!'],
+    ['Special Characters: @#$%'],
+  ])('should display the provided title "%s"', (title) => {
+    // given / when
+    render(<Header title={title} />)
 
-  // then
-  expect(screen.getByRole('heading')).toBeInTheDocument()
-})
+    // then
+    expect(screen.getByText(title)).toBeInTheDocument()
+  })
 
-test('should render title', () => {
-  // given / when
-  render(<Header title="test-title" />)
+  it('should render header element when title is empty', () => {
+    // given / when
+    render(<Header title="" />)
 
-  // then
-  expect(screen.getByText('test-title')).toBeInTheDocument()
+    // then
+    const heading = screen.getByRole('heading', { level: 2 })
+    expect(heading).toBeInTheDocument()
+    expect(heading).toHaveTextContent('')
+  })
 })

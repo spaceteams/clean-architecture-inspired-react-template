@@ -2,23 +2,19 @@ import { render, screen } from '@testing-library/react'
 import { expect, test } from 'vitest'
 import { Footer } from './Footer.tsx'
 
-test('should render component', () => {
-  // given / when
-  render(<Footer />)
+test('should render children content', () => {
+  // given
+  const childContent = 'Footer content'
 
-  // then
-  expect(screen.getByTestId('footer')).toBeInTheDocument()
-})
-
-test('should render children', () => {
-  // given / when
-  const content = <div>child</div>
+  // when
   render(
     <Footer>
-      {content}
+      <span>
+        {childContent}
+      </span>
     </Footer>,
   )
 
   // then
-  expect(screen.getByText('child')).toBeInTheDocument()
+  expect(screen.getByText(childContent)).toBeInTheDocument()
 })

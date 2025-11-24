@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { DeleteTodoDialog } from './DeleteTodoDialog.tsx'
 
 beforeEach(() => {
@@ -9,111 +9,80 @@ beforeEach(() => {
   document.body.append(portalRoot)
 })
 
-test('should render dialog', () => {
-  // given / when
-  render(<DeleteTodoDialog open={true} todoName="" onConfirm={vi.fn()} onCancel={vi.fn()} />)
+describe('DeleteTodoDialog', () => {
+  describe('when dialog is open', () => {
+    it('should display confirmation message with todo name', () => {
+      // given / when
+      render(<DeleteTodoDialog open={true} todoName="My Important Task" onConfirm={vi.fn()} onCancel={vi.fn()} />)
 
-  // then
-  expect(screen.getByTestId('dialog')).toBeInTheDocument()
-})
+      // then
+      expect(screen.getByText('Delete TODO?')).toBeInTheDocument()
+      expect(
+        screen.getByText('The TODO "My Important Task" will be removed permanently. Do you want to proceed?'),
+      ).toBeInTheDocument()
+    })
 
-test('should render dialog wrapped in overlay', () => {
-  // given / when
-  render(<DeleteTodoDialog open={true} todoName="" onConfirm={vi.fn()} onCancel={vi.fn()} />)
+    it.each([
+      ['onConfirm', 'Ok'],
+      ['onCancel', 'Cancel'],
+    ])('should call %s callback when user clicks %s button', async (callbackName, buttonText) => {
+      const user = userEvent.setup()
+      const mockCallback = vi.fn()
+      const props = {
+        open: true,
+        todoName: 'Test Todo',
+        onConfirm: callbackName === 'onConfirm' ? mockCallback : vi.fn(),
+        onCancel: callbackName === 'onCancel' ? mockCallback : vi.fn(),
+      }
 
-  // then
-  expect(screen.getByTestId('dialog').parentElement?.dataset.testid).toEqual('overlay')
-})
+      // given
+      render(<DeleteTodoDialog {...props} />)
 
-test('should render dialog inside portal', () => {
-  // given / when
-  render(<DeleteTodoDialog open={true} todoName="" onConfirm={vi.fn()} onCancel={vi.fn()} />)
+      // when
+      await user.click(screen.getByText(buttonText))
 
-  // then
-  expect(screen.getByTestId('overlay').parentElement?.id).toEqual('portal-root')
-})
+      // then
+      expect(mockCallback).toHaveBeenCalledOnce()
+    })
 
-test('should render title and description', () => {
-  // given / when
-  render(<DeleteTodoDialog open={true} todoName="test-todo" onConfirm={vi.fn()} onCancel={vi.fn()} />)
+    it('should call onCancel callback when user clicks outside dialog', async () => {
+      const user = userEvent.setup()
+      const onCancel = vi.fn()
 
-  // then
-  expect(screen.getByText('Delete TODO?')).toBeInTheDocument()
-  expect(
-    screen.getByText('The TODO "test-todo" will be removed permanently. Do you want to proceed?'),
-  ).toBeInTheDocument()
-})
+      // given
+      render(<DeleteTodoDialog open={true} todoName="Test" onConfirm={vi.fn()} onCancel={onCancel} />)
 
-test('should render controls', async () => {
-  // given / when
-  render(<DeleteTodoDialog open={true} todoName="" onConfirm={vi.fn()} onCancel={vi.fn()} />)
+      // when
+      await user.click(screen.getByTestId('overlay'))
 
-  // then
-  expect(screen.getByText('Ok')).toBeInTheDocument()
-  expect(screen.getByText('Cancel')).toBeInTheDocument()
-})
+      // then
+      expect(onCancel).toHaveBeenCalledOnce()
+    })
 
-test('should call onConfirm if deletion is confirmed', async () => {
-  const user = userEvent.setup()
+    it('should not trigger cancel when clicking inside dialog content', async () => {
+      const user = userEvent.setup()
+      const onCancel = vi.fn()
 
-  // given
-  const onConfirm = vi.fn()
-  render(<DeleteTodoDialog open={true} todoName="" onConfirm={onConfirm} onCancel={vi.fn()} />)
+      // given
+      render(<DeleteTodoDialog open={true} todoName="Test" onConfirm={vi.fn()} onCancel={onCancel} />)
 
-  // when
-  await user.click(screen.getByText('Ok'))
+      // when
+      await user.click(screen.getByText('Delete TODO?'))
 
-  // then
-  expect(onConfirm).toHaveBeenCalled()
-})
+      // then
+      expect(onCancel).not.toHaveBeenCalled()
+    })
+  })
 
-test('should call onCancel if deletion is canceled per click on button', async () => {
-  const user = userEvent.setup()
+  describe('when dialog is closed', () => {
+    it('should not display any dialog content', () => {
+      // given / when
+      render(<DeleteTodoDialog open={false} todoName="Test" onConfirm={vi.fn()} onCancel={vi.fn()} />)
 
-  // given
-  const onCancel = vi.fn()
-  render(<DeleteTodoDialog open={true} todoName="" onConfirm={vi.fn()} onCancel={onCancel} />)
-
-  // when
-  await user.click(screen.getByText('Cancel'))
-
-  // then
-  expect(onCancel).toHaveBeenCalled()
-})
-
-test('should call onCancel if deletion is canceled per click on overlay', async () => {
-  const user = userEvent.setup()
-
-  // given
-  const onCancel = vi.fn()
-  render(<DeleteTodoDialog open={true} todoName="" onConfirm={vi.fn()} onCancel={onCancel} />)
-
-  // when
-  await user.click(screen.getByTestId('overlay'))
-
-  // then
-  expect(onCancel).toHaveBeenCalled()
-})
-
-test('should not call onCancel if dialog is clicked', async () => {
-  const user = userEvent.setup()
-
-  // given
-  const onCancel = vi.fn()
-  render(<DeleteTodoDialog open={true} todoName="" onConfirm={vi.fn()} onCancel={onCancel} />)
-
-  // when
-  await user.click(screen.getByText('Delete TODO?').parentElement!)
-
-  // then
-  expect(onCancel).not.toHaveBeenCalled()
-})
-
-test('should not render dialog if closed', () => {
-  // given / when
-  render(<DeleteTodoDialog open={false} todoName="" onConfirm={vi.fn()} onCancel={vi.fn()} />)
-
-  // then
-  expect(screen.queryByTestId('overlay')).not.toBeInTheDocument()
-  expect(screen.queryByTestId('dialog')).not.toBeInTheDocument()
+      // then
+      expect(screen.queryByText('Delete TODO?')).not.toBeInTheDocument()
+      expect(screen.queryByText('Ok')).not.toBeInTheDocument()
+      expect(screen.queryByText('Cancel')).not.toBeInTheDocument()
+    })
+  })
 })

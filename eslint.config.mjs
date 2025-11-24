@@ -102,7 +102,6 @@ export default [{
     '@stylistic/generator-star-spacing': ['error', 'before'],
     '@stylistic/array-bracket-spacing': ['error'],
     '@stylistic/jsx-indent-props': ['error', 2],
-    '@stylistic/jsx-indent': ['error', 2],
     '@stylistic/indent': ['error', 2],
     '@stylistic/indent-binary-ops': ['error', 2],
 

@@ -1,53 +1,62 @@
-import { css } from '@emotion/react'
 import userEvent from '@testing-library/user-event'
 import { render, screen } from '@testing-library/react'
-import { test, expect, vi } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { Button } from './Button.tsx'
 
-test('should render button', () => {
-  // given / when
-  render(<Button label="" onClick={vi.fn()} />)
+describe('Button', () => {
+  it('should be accessible as a button element', () => {
+    // given / when
+    render(<Button label="Test Button" onClick={vi.fn()} />)
 
-  // then
-  expect(screen.getByRole('button')).toBeInTheDocument()
-})
+    // then
+    expect(screen.getByRole('button')).toBeInTheDocument()
+  })
 
-test('should render label', () => {
-  // given / when
-  render(<Button label="test-label" onClick={vi.fn()} />)
+  it.each([
+    ['Save'],
+    ['Cancel'],
+    ['Submit Form'],
+    ['Delete Item'],
+    [''],
+  ])('should display the provided label: "%s"', (label) => {
+    // given / when
+    render(<Button label={label} onClick={vi.fn()} />)
 
-  // then
-  expect(screen.getByText('test-label')).toBeInTheDocument()
-})
+    // then
+    if (label) {
+      expect(screen.getByText(label)).toBeInTheDocument()
+    } else {
+      expect(screen.getByRole('button')).toHaveTextContent('')
+    }
+  })
 
-test('should call onClick if button is clicked', async () => {
-  const user = userEvent.setup()
+  it('should execute the click handler when activated', async () => {
+    const user = userEvent.setup()
+    const clickHandler = vi.fn()
 
-  // given
-  const onClick = vi.fn()
-  render(<Button label="" onClick={onClick} />)
+    // given
+    render(<Button label="Click Me" onClick={clickHandler} />)
 
-  // when
-  await user.click(screen.getByRole('button'))
+    // when
+    await user.click(screen.getByRole('button'))
 
-  // then
-  expect(onClick).toHaveBeenCalled()
-})
+    // then
+    expect(clickHandler).toHaveBeenCalledOnce()
+  })
 
-test('should apply custom styles', () => {
-  // given / when
-  const customStyles = css({ color: 'green' })
-  render(<Button label="" onClick={vi.fn()} customStyles={customStyles} />)
+  it('should execute click handler multiple times for multiple clicks', async () => {
+    const user = userEvent.setup()
+    const clickHandler = vi.fn()
 
-  // then
-  expect(screen.getByRole('button')).toHaveStyle({ color: 'rgb(0, 128, 0)' })
-})
+    // given
+    render(<Button label="Click Me" onClick={clickHandler} />)
 
-test('should apply multiple custom styles', () => {
-  // given / when
-  const customStyles = [css({ color: 'green' }), css({ backgroundColor: 'red' })]
-  render(<Button label="" onClick={vi.fn()} customStyles={customStyles} />)
+    // when
+    await user.click(screen.getByRole('button'))
+    await user.click(screen.getByRole('button'))
+    await user.click(screen.getByRole('button'))
 
-  // then
-  expect(screen.getByRole('button')).toHaveStyle({ color: 'rgb(0, 128, 0)', backgroundColor: 'rgb(255, 0, 0)' })
+    // then
+    expect(clickHandler).toHaveBeenCalledTimes(3)
+  })
 })

@@ -3,17 +3,9 @@ import userEvent from '@testing-library/user-event'
 import { expect, test, vi } from 'vitest'
 import { Overlay } from './Overlay.tsx'
 
-test('should render component', () => {
+test('should display overlay content to the user', () => {
   // given / when
-  render(<Overlay />)
-
-  // then
-  expect(screen.getByTestId('overlay')).toBeInTheDocument()
-})
-
-test('should render children', () => {
-  // given / when
-  const content = <div>child</div>
+  const content = <div>Modal Content</div>
   render(
     <Overlay>
       {content}
@@ -21,38 +13,50 @@ test('should render children', () => {
   )
 
   // then
-  expect(screen.getByText('child')).toBeInTheDocument()
+  expect(screen.getByText('Modal Content')).toBeInTheDocument()
 })
 
-test('should call onClick if the overlay is clicked', async () => {
+test('should trigger close action when overlay background is clicked', async () => {
   const user = userEvent.setup()
 
   // given
-  const onClick = vi.fn()
-  render(<Overlay onClick={onClick} />)
+  const onCloseSpy = vi.fn()
+  render(<Overlay onClick={onCloseSpy} />)
 
   // when
   await user.click(screen.getByTestId('overlay'))
 
   // then
-  expect(onClick).toHaveBeenCalled()
+  expect(onCloseSpy).toHaveBeenCalledOnce()
 })
 
-test('should call onClick if a child is clicked', async () => {
+test('should trigger close action when clicking anywhere within overlay area', async () => {
   const user = userEvent.setup()
 
   // given
-  const onClick = vi.fn()
-  const content = <div>child</div>
+  const onCloseSpy = vi.fn()
+  const content = <div>Modal Content</div>
   render(
-    <Overlay onClick={onClick}>
+    <Overlay onClick={onCloseSpy}>
       {content}
     </Overlay>,
   )
 
   // when
-  await user.click(screen.getByText('child'))
+  await user.click(screen.getByText('Modal Content'))
 
   // then
-  expect(onClick).toHaveBeenCalled()
+  expect(onCloseSpy).toHaveBeenCalledOnce()
+})
+
+test('should not trigger any action when no click handler is provided', async () => {
+  const user = userEvent.setup()
+
+  // given
+  render(<Overlay />)
+
+  // when / then - should not throw error
+  await user.click(screen.getByTestId('overlay'))
+  // If we reach this point, no error was thrown
+  expect(screen.getByTestId('overlay')).toBeInTheDocument()
 })

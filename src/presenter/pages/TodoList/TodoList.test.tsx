@@ -1,98 +1,128 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import * as Router from 'react-router-dom'
-import { beforeEach, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { TodoList } from './TodoList.tsx'
 
-beforeEach(() => {
-  localStorage.setItem('todos', JSON.stringify([
-    { id: '1', title: 'Todo 1', description: 'Description 1' },
-    { id: '2', title: 'Todo 2', description: 'Description 2' },
-  ]))
-})
-
-test('should render page with title, a list of todos, and footer with a create button', async () => {
-  // given / when
-  render(<TodoList />)
-
-  // then
-  expect(screen.getByTestId('page')).toBeInTheDocument()
-  expect(screen.getByRole('heading', { name: 'TODOs' })).toBeInTheDocument()
-
-  await waitFor(() => {
-    expect(screen.getAllByTestId('list-item')).toHaveLength(2)
-    expect(screen.getByText('Todo 1')).toBeInTheDocument()
-    expect(screen.getByText('Todo 2')).toBeInTheDocument()
+describe('TodoList', () => {
+  beforeEach(() => {
+    localStorage.setItem('todos', JSON.stringify([
+      { id: '1', title: 'Todo 1', description: 'Description 1' },
+      { id: '2', title: 'Todo 2', description: 'Description 2' },
+    ]))
   })
 
-  expect(screen.getByTestId('footer')).toBeInTheDocument()
-  expect(screen.getByRole('button', { name: '+' })).toBeInTheDocument()
-})
+  describe('Todo Display', () => {
+    it('should display all existing todos to the user', async () => {
+      // given / when
+      render(<TodoList />)
 
-test('should open dialog and ask for permission to delete a todo', async () => {
-  const user = userEvent.setup()
+      // then
+      expect(screen.getByRole('heading', { name: 'TODOs' })).toBeInTheDocument()
 
-  // given
-  render(
-    <div>
-      <div id="portal-root" />
-      <TodoList />
-    </div>,
-  )
+      await waitFor(() => {
+        expect(screen.getAllByTestId('list-item')).toHaveLength(2)
+        expect(screen.getByText('Todo 1')).toBeInTheDocument()
+        expect(screen.getByText('Todo 2')).toBeInTheDocument()
+      })
+    })
 
-  const listItems = await waitFor(() => screen.getAllByTestId('list-item'))
+    it('should provide access to todo creation functionality', async () => {
+      // given / when
+      render(<TodoList />)
 
-  // when
-  await user.click(listItems[0].querySelector('svg')!)
+      // then
+      await waitFor(() => {
+        expect(screen.getAllByTestId('list-item')).toHaveLength(2)
+        expect(screen.getByRole('button', { name: '+' })).toBeInTheDocument()
+      })
+    })
+  })
 
-  // then
-  expect(screen.getByTestId('dialog')).toBeInTheDocument()
-  expect(screen.getByRole('heading', { name: 'Delete TODO?' })).toBeInTheDocument()
-  expect(screen.getByText('The TODO "Todo 1" will be removed permanently. Do you want to proceed?')).toBeInTheDocument()
-  expect(screen.getByText('Cancel')).toBeInTheDocument()
-  expect(screen.getByText('Ok')).toBeInTheDocument()
-})
+  describe('Todo Deletion', () => {
+    it('should request user confirmation before deleting a todo', async () => {
+      const user = userEvent.setup()
 
-test('should delete todo and close dialog', async () => {
-  const user = userEvent.setup()
+      // given
+      render(
+        <div>
+          <div id="portal-root" />
+          <TodoList />
+        </div>,
+      )
 
-  // given
-  render(
-    <div>
-      <div id="portal-root" />
-      <TodoList />
-    </div>,
-  )
+      const listItems = await waitFor(() => screen.getAllByTestId('list-item'))
 
-  const listItems = await waitFor(() => screen.getAllByTestId('list-item'))
+      // when
+      await user.click(listItems[0].querySelector('svg')!)
 
-  // when
-  await user.click(listItems[0].querySelector('svg')!)
-  await user.click(screen.getByText('Ok'))
+      // then
+      expect(screen.getByRole('heading', { name: 'Delete TODO?' })).toBeInTheDocument()
+      expect(screen.getByText(
+        'The TODO "Todo 1" will be removed permanently. Do you want to proceed?',
+      )).toBeInTheDocument()
+      expect(screen.getByText('Cancel')).toBeInTheDocument()
+      expect(screen.getByText('Ok')).toBeInTheDocument()
+    })
 
-  // then
-  const todos = JSON.parse(localStorage.getItem('todos')!)
-  expect(todos).toHaveLength(1)
-  expect(todos[0].title).toEqual('Todo 2')
-  expect(todos[0].description).toEqual('Description 2')
+    it('should permanently remove todo when user confirms deletion', async () => {
+      const user = userEvent.setup()
 
-  expect(screen.queryByTestId('dialog')).not.toBeInTheDocument()
-})
+      // given
+      render(
+        <div>
+          <div id="portal-root" />
+          <TodoList />
+        </div>,
+      )
 
-test('should navigate to the todo details page', async () => {
-  const user = userEvent.setup()
+      const listItems = await waitFor(() => screen.getAllByTestId('list-item'))
 
-  // given
-  const navigateSpy = vi.fn()
-  vi.spyOn(Router, 'useNavigate').mockReturnValue(navigateSpy)
+      // when
+      await user.click(listItems[0].querySelector('svg')!)
+      await user.click(screen.getByText('Ok'))
 
-  render(<TodoList />)
+      // then
+      const remainingTodos = JSON.parse(localStorage.getItem('todos')!)
+      expect(remainingTodos).toHaveLength(1)
+      expect(remainingTodos[0].title).toEqual('Todo 2')
+      expect(remainingTodos[0].description).toEqual('Description 2')
 
-  const listItems = await waitFor(() => screen.getAllByTestId('list-item'))
+      expect(screen.queryByTestId('dialog')).not.toBeInTheDocument()
+    })
+  })
 
-  // when
-  await user.click(listItems[0])
+  describe('Navigation', () => {
+    it('should navigate to todo details when user selects a todo', async () => {
+      const user = userEvent.setup()
+      const navigateSpy = vi.fn()
 
-  // then
-  expect(navigateSpy).toHaveBeenCalledWith('/todo/detail/1')
+      // given
+      vi.spyOn(Router, 'useNavigate').mockReturnValue(navigateSpy)
+      render(<TodoList />)
+
+      const listItems = await waitFor(() => screen.getAllByTestId('list-item'))
+
+      // when
+      await user.click(listItems[0])
+
+      // then
+      expect(navigateSpy).toHaveBeenCalledWith('/todo/detail/1')
+    })
+
+    it('should navigate to todo creation when user clicks create button', async () => {
+      const user = userEvent.setup()
+      const navigateSpy = vi.fn()
+
+      // given
+      vi.spyOn(Router, 'useNavigate').mockReturnValue(navigateSpy)
+      render(<TodoList />)
+
+      // when
+      await user.click(screen.getByRole('button', { name: '+' }))
+
+      // then
+      expect(navigateSpy).toHaveBeenCalledWith('/todo/create')
+    })
+  })
 })

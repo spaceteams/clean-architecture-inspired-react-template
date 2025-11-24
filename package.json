@@ -9,10 +9,12 @@
   "main": "src/main.tsx",
   "scripts": {
     "prepare": "husky",
-    "format": "eslint . --fix",
-    "lint": "eslint . --report-unused-disable-directives",
+    "lint": "eslint --max-warnings 0 .",
+    "lint:fix": "eslint --max-warnings 0 --fix .",
     "dev": "vite",
-    "test": "vitest run",
+    "test": "vitest",
+    "test:ci": "vitest run",
+    "check-types": "tsc --noEmit",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
@@ -45,6 +47,6 @@
     "typescript": "5.9.3",
     "vite": "7.2.4",
     "vite-plugin-svgr": "4.5.0",
-    "vitest": "4.0.12"
+    "vitest": "4.0.13"
   }
 }

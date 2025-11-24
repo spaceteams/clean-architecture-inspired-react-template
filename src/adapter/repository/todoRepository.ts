@@ -5,13 +5,9 @@ import { ITodoRepository } from '../../domain/repository/ITodoRepository.ts'
 export const todoRepository = (): ITodoRepository => {
   const COLLECTION_NAME: string = 'todos'
 
-  const get = (): Promise<Todo[]> => {
-    try {
-      const result = localStorage.getItem(COLLECTION_NAME)
-      return result !== null ? JSON.parse(result) : []
-    } catch (error) {
-      return Promise.reject(error)
-    }
+  const get = async (): Promise<Todo[]> => {
+    const result = localStorage.getItem(COLLECTION_NAME)
+    return (result !== null ? JSON.parse(result) : []) as Todo[]
   }
 
   const getById = async (id: Id): Promise<Todo> => {

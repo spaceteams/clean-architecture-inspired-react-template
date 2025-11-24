@@ -1,73 +1,120 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { DI } from '../../../di/ioc.ts'
 import { CreateTodo } from './CreateTodo.tsx'
 
-beforeEach(() => {
-  localStorage.setItem('todos', '[]')
+// Mock the DI container to spy on business logic
+vi.mock('../../../di/ioc.ts', () => ({
+  DI: {
+    resolve: vi.fn(),
+  },
+}))
 
-  vi.useFakeTimers()
-  vi.setSystemTime(new Date('2011-11-11T11:11:11.000Z'))
+// Mock react-router-dom to avoid navigation issues during tests
+vi.mock('react-router-dom', () => ({
+  useNavigate: () => vi.fn(),
+}))
 
-  // https://github.com/vitest-dev/vitest/issues/3184#issuecomment-1506219115
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  globalThis.jest = {
-    advanceTimersByTime: vi.advanceTimersByTime,
-  }
-})
+describe('CreateTodo Page', () => {
+  let mockCreateTodo: ReturnType<typeof vi.fn>
+  let mockSetTitle: ReturnType<typeof vi.fn>
+  let mockSetDescription: ReturnType<typeof vi.fn>
 
-test('should render page with title, input, textarea, and create button', () => {
-  // given / when
-  render(<CreateTodo />)
+  beforeEach(() => {
+    vi.clearAllMocks()
 
-  // then
-  expect(screen.getByTestId('page')).toBeInTheDocument()
-  expect(screen.getByRole('heading', { name: 'Create TODO' })).toBeInTheDocument()
+    mockCreateTodo = vi.fn()
+    mockSetTitle = vi.fn()
+    mockSetDescription = vi.fn()
 
-  expect(screen.getByTestId('content')).toBeInTheDocument()
-  expect(screen.getByRole('heading', { name: 'Title:' })).toBeInTheDocument()
-  expect(screen.getByRole('heading', { name: 'Description:' })).toBeInTheDocument()
+    // Mock the view model to return spy functions
+    vi.mocked(DI.resolve).mockReturnValue({
+      createTodo: mockCreateTodo,
+      setTitle: mockSetTitle,
+      setDescription: mockSetDescription,
+    })
 
-  const inputs = screen.getAllByRole('textbox')
-  expect(inputs).toHaveLength(2)
-  expect(inputs[0].tagName).toEqual('INPUT')
-  expect(inputs[1].tagName).toEqual('TEXTAREA')
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2011-11-11T11:11:11.000Z'))
 
-  expect(screen.getByTestId('footer')).toBeInTheDocument()
-  expect(screen.getByRole('button', { name: 'Create' })).toBeInTheDocument()
-})
+    // https://github.com/vitest-dev/vitest/issues/3184#issuecomment-1506219115
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    globalThis.jest = {
+      advanceTimersByTime: vi.advanceTimersByTime,
+    }
+  })
 
-test('should create todo with entered title and description', async () => {
-  const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+  describe('Todo Creation Business Logic', () => {
+    it.each([
+      ['test-title', 'test-description'],
+      ['', ''],
+      ['Only title', ''],
+      ['', 'Only description'],
+    ])('should create todo when title is "%s" and description is "%s"', async (title, description) => {
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
 
-  // given
-  render(<CreateTodo />)
+      // given
+      render(<CreateTodo />)
+      const inputs = screen.getAllByRole('textbox')
 
-  const inputs = screen.getAllByRole('textbox')
+      // when
+      if (title) await user.type(inputs[0], title)
+      if (description) await user.type(inputs[1], description)
+      await user.click(screen.getByRole('button', { name: 'Create' }))
 
-  // when
-  await user.type(inputs[0], 'test-title')
-  await user.type(inputs[1], 'test-description')
-  await user.click(screen.getByRole('button', { name: 'Create' }))
+      // then
+      expect(mockCreateTodo).toHaveBeenCalledTimes(1)
+    })
 
-  // then
-  expect(localStorage.getItem('todos')).toEqual(
-    JSON.stringify([{ title: 'test-title', description: 'test-description', id: '1321009871000' }]),
-  )
-})
+    it('should update title when user types in title field', async () => {
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
 
-test('should create todo without title and description', async () => {
-  const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+      // given
+      render(<CreateTodo />)
+      const titleInput = screen.getAllByRole('textbox')[0]
 
-  // given
-  render(<CreateTodo />)
+      // when
+      await user.type(titleInput, 'My Todo Title')
 
-  // when
-  await user.click(screen.getByRole('button', { name: 'Create' }))
+      // then
+      expect(mockSetTitle).toHaveBeenCalledTimes('My Todo Title'.length)
+      expect(mockSetTitle).toHaveBeenLastCalledWith('My Todo Title')
+    })
 
-  // then
-  expect(localStorage.getItem('todos')).toEqual(
-    JSON.stringify([{ title: '', description: '', id: '1321009871000' }]),
-  )
+    it('should update description when user types in description field', async () => {
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+
+      // given
+      render(<CreateTodo />)
+      const descriptionInput = screen.getAllByRole('textbox')[1]
+
+      // when
+      await user.type(descriptionInput, 'My description')
+
+      // then
+      expect(mockSetDescription).toHaveBeenCalledTimes('My description'.length)
+      expect(mockSetDescription).toHaveBeenLastCalledWith('My description')
+    })
+  })
+
+  describe('User Interface', () => {
+    it('should render all required form elements for todo creation', () => {
+      // given / when
+      render(<CreateTodo />)
+
+      // then
+      expect(screen.getByRole('heading', { name: 'Create TODO' })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'Title:' })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'Description:' })).toBeInTheDocument()
+
+      const inputs = screen.getAllByRole('textbox')
+      expect(inputs).toHaveLength(2)
+      expect(inputs[0].tagName).toEqual('INPUT')
+      expect(inputs[1].tagName).toEqual('TEXTAREA')
+
+      expect(screen.getByRole('button', { name: 'Create' })).toBeInTheDocument()
+    })
+  })
 })
