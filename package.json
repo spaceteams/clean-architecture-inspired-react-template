@@ -7,6 +7,9 @@
   "license": "MIT",
   "author": "info@spaceteams.de",
   "main": "src/main.tsx",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "prepare": "husky",
     "lint": "eslint --max-warnings 0 .",

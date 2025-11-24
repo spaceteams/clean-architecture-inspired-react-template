@@ -20,10 +20,10 @@ jobs:
             node_modules
             */node_modules
 
-      - name: Use Node.js 18
+      - name: Use Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 22.x
           cache: "npm"
 
       - name: Installing dependencies
@@ -31,6 +31,31 @@ jobs:
 
       - name: Run lint
         run: npm run lint
+
+  check-types:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          path: |
+            node_modules
+            */node_modules
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: "npm"
+
+      - name: Installing dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run check-types
 
   test:
     runs-on: ubuntu-22.04
@@ -45,10 +70,10 @@ jobs:
             node_modules
             */node_modules
 
-      - name: Use Node.js 18
+      - name: Use Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 22.x
           cache: "npm"
 
       - name: Installing dependencies
