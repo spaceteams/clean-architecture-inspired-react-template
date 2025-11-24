@@ -1,29 +1,60 @@
-import { expect, test, vi } from 'vitest'
+import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { ITodoRepository } from '../../repository/ITodoRepository.ts'
 import { updateTodoUseCase } from './updateTodoUseCase.ts'
 
-const repository = { update: vi.fn() } as unknown as ITodoRepository
-const useCase = updateTodoUseCase({ todoRepository: repository })
+describe('UpdateTodoUseCase', () => {
+  const mockRepository = { update: vi.fn() } as unknown as ITodoRepository
+  const useCase = updateTodoUseCase({ todoRepository: mockRepository })
 
-test('should update a todo', async () => {
-  // given
-  const todo = { id: '1', title: 'Todo', description: 'updated description' }
-  const updateSpy = vi.spyOn(repository, 'update')
-  updateSpy.mockReturnValueOnce(Promise.resolve(todo))
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
 
-  // when
-  const result = await useCase.execute(todo)
+  describe('when updating a todo successfully', () => {
+    it('should update todo with new title and description', async () => {
+      // given
+      const todoUpdate = { id: '1', title: 'Updated Todo', description: 'Updated description' }
+      const expectedUpdatedTodo = { id: '1', title: 'Updated Todo', description: 'Updated description' }
+      const updateSpy = vi.spyOn(mockRepository, 'update')
+      updateSpy.mockResolvedValue(expectedUpdatedTodo)
 
-  // then
-  expect(result).toEqual(todo)
-  expect(updateSpy).toHaveBeenCalledWith(todo.id, todo.title, todo.description)
-})
+      // when
+      const result = await useCase.execute(todoUpdate)
 
-test('should return error if updating a todo fails', async () => {
-  // given
-  const updateSpy = vi.spyOn(repository, 'update')
-  updateSpy.mockReturnValueOnce(Promise.reject(Error('expected error')))
+      // then
+      expect(result).toEqual(expectedUpdatedTodo)
+      expect(updateSpy).toHaveBeenCalledWith(todoUpdate.id, todoUpdate.title, todoUpdate.description)
+    })
 
-  // when / then
-  await expect(useCase.execute({ id: '', title: '', description: '' })).rejects.toThrow('expected error')
+    it('should preserve todo ID during update', async () => {
+      // given
+      const originalId = 'todo-123'
+      const todoUpdate = { id: originalId, title: 'New Title', description: 'New Description' }
+      const updateSpy = vi.spyOn(mockRepository, 'update')
+      updateSpy.mockResolvedValue(todoUpdate)
+
+      // when
+      await useCase.execute(todoUpdate)
+
+      // then
+      expect(updateSpy).toHaveBeenCalledWith(originalId, expect.any(String), expect.any(String))
+    })
+  })
+
+  describe('when updating a todo fails', () => {
+    it.each([
+      ['Database connection error', 'Database connection failed'],
+      ['Todo not found', 'Todo with id does not exist'],
+      ['Network error', 'Network timeout occurred'],
+      ['Validation error', 'Invalid todo data provided'],
+    ])('should propagate %s from repository', async (_, errorMessage) => {
+      // given
+      const todoUpdate = { id: '1', title: 'Title', description: 'Description' }
+      const updateSpy = vi.spyOn(mockRepository, 'update')
+      updateSpy.mockRejectedValue(new Error(errorMessage))
+
+      // when / then
+      await expect(useCase.execute(todoUpdate)).rejects.toThrow(errorMessage)
+    })
+  })
 })

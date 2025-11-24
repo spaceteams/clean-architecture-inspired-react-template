@@ -1,50 +1,62 @@
 import { css } from '@emotion/react'
 import { render, screen } from '@testing-library/react'
-import { expect, test } from 'vitest'
+import { Property } from 'csstype'
+import { describe, expect, it } from 'vitest'
 import { Content } from './Content.tsx'
 
-test('should render component', () => {
-  // given / when
-  render(<Content />)
+describe('Content', () => {
+  it('should render component', () => {
+    // given / when
+    render(<Content />)
 
-  // then
-  expect(screen.getByTestId('content')).toBeInTheDocument()
-})
+    // then
+    expect(screen.getByTestId('content')).toBeInTheDocument()
+  })
 
-test('should render children', () => {
-  // given / when
-  const content = <div>child</div>
-  render(
-    <Content>
-      {content}
-    </Content>,
-  )
+  it('should display provided child content', () => {
+    // given / when
+    const childContent = <div>child</div>
+    render(
+      <Content>
+        {childContent}
+      </Content>,
+    )
 
-  // then
-  expect(screen.getByText('child')).toBeInTheDocument()
-})
+    // then
+    expect(screen.getByText('child')).toBeInTheDocument()
+  })
 
-test('should use column as default flex direction', () => {
-  // given / when
-  render(<Content />)
+  describe('flex direction behavior', () => {
+    it('should default to column layout when no direction is specified', () => {
+      // given / when
+      render(<Content />)
 
-  // then
-  expect(screen.getByTestId('content')).toHaveStyle({ flexDirection: 'column' })
-})
+      // then
+      expect(screen.getByTestId('content')).toHaveStyle({ flexDirection: 'column' })
+    })
 
-test('should respect custom flex direction', () => {
-  // given / when
-  render(<Content direction="row" />)
+    it.each([
+      ['row'],
+      ['column'],
+      ['row-reverse'],
+      ['column-reverse'],
+    ])('should apply %s flex direction when specified', (direction) => {
+      // given / when
+      render(<Content direction={direction as Property.FlexDirection} />)
 
-  // then
-  expect(screen.getByTestId('content')).toHaveStyle({ flexDirection: 'row' })
-})
+      // then
+      expect(screen.getByTestId('content')).toHaveStyle({ flexDirection: direction })
+    })
+  })
 
-test('should apply custom styles', () => {
-  // given / when
-  const customStyles = css({ color: 'green' })
-  render(<Content customStyles={customStyles} />)
+  it('should apply custom styling when provided', () => {
+    // given
+    const customStyles = css({ color: 'green' })
 
-  // then
-  expect(screen.getByTestId('content')).toHaveStyle({ color: 'rgb(0, 128, 0)' })
+    // when
+    render(<Content customStyles={customStyles} />)
+
+    // then
+    expect(screen.getByTestId('content')).toHaveStyle({ color: 'rgb(0, 128, 0)' })
+  })
 })

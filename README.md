@@ -107,6 +107,10 @@ or React with Angular, without touching your use cases or entities.
 
 ## Getting Started
 
+**Prerequisites:**
+
+- Node.js 22 or later
+
 Clone the repository:
 
 ```bash

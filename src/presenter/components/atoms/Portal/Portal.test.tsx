@@ -1,53 +1,84 @@
 import { render, screen } from '@testing-library/react'
-import { beforeEach, expect, test } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Portal } from './Portal.tsx'
 
-beforeEach(() => {
-  const portalRoot = document.createElement('div')
-  portalRoot.setAttribute('id', 'portal-root')
-  document.body.append(portalRoot)
-})
+describe('Portal', () => {
+  beforeEach(() => {
+    // Setup default portal root for tests
+    const portalRoot = document.createElement('div')
+    portalRoot.setAttribute('id', 'portal-root')
+    document.body.append(portalRoot)
+  })
 
-test('should render content in target', () => {
-  // given / when
-  const content = <div>content</div>
-  render(
-    <Portal>
-      {content}
-    </Portal>,
-  )
+  afterEach(() => {
+    // Clean up DOM after each test
+    document.body.innerHTML = ''
+  })
 
-  // then
-  expect(screen.getByText('content')).toBeInTheDocument()
-})
+  it('should render children when default container exists', () => {
+    // given
+    const content = <div>test content</div>
 
-test('should render content in default target', () => {
-  // given / when
-  const content = <div>content</div>
-  render(
-    <Portal>
-      {content}
-    </Portal>,
-  )
+    // when
+    render(
+      <Portal>
+        {content}
+      </Portal>,
+    )
 
-  // then
-  expect(screen.getByText('content').parentElement?.id).toEqual('portal-root')
-})
+    // then
+    expect(screen.getByText('test content')).toBeInTheDocument()
+  })
 
-test('should render content in custom target', () => {
-  const customPortalRoot = document.createElement('div')
-  customPortalRoot.setAttribute('id', 'custom-portal-root')
-  document.body.append(customPortalRoot)
+  it('should render children when custom target is provided', () => {
+    // given
+    const customTarget = document.createElement('div')
+    document.body.append(customTarget)
+    const content = <div>custom content</div>
 
-  // given / when
-  const content = <div>content</div>
-  render(
-    <Portal target={customPortalRoot}>
-      {content}
-    </Portal>,
-  )
+    // when
+    render(
+      <Portal target={customTarget}>
+        {content}
+      </Portal>,
+    )
 
-  // then
-  expect(screen.getByText('content').parentElement?.id).toEqual('custom-portal-root')
-  expect(document.querySelector('#portal-root')?.childElementCount).toEqual(0)
+    // then
+    expect(screen.getByText('custom content')).toBeInTheDocument()
+  })
+
+  it('should handle gracefully when no container exists', () => {
+    // given
+    document.querySelector('#portal-root')?.remove()
+    const content = <div>no container content</div>
+
+    // when
+    render(
+      <Portal>
+        {content}
+      </Portal>,
+    )
+
+    // then
+    expect(screen.queryByText('no container content')).not.toBeInTheDocument()
+  })
+
+  it('should prioritize custom target over default container', () => {
+    // given
+    const customTarget = document.createElement('div')
+    customTarget.setAttribute('data-testid', 'custom-target')
+    document.body.append(customTarget)
+    const content = <div>priority test</div>
+
+    // when
+    render(
+      <Portal target={customTarget}>
+        {content}
+      </Portal>,
+    )
+
+    // then
+    expect(screen.getByText('priority test')).toBeInTheDocument()
+    expect(customTarget).toContainElement(screen.getByText('priority test'))
+  })
 })

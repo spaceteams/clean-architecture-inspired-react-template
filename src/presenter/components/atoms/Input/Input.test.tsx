@@ -1,44 +1,55 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { expect, test, vi } from 'vitest'
+import { expect, describe, it, vi } from 'vitest'
 import { Input } from './Input.tsx'
 
-test('should render label and input', () => {
-  // given / when
-  render(<Input label="" onChange={vi.fn()} />)
+describe('Input', () => {
+  it('should display the provided label', () => {
+    // given / when
+    render(<Input label="Username" onChange={vi.fn()} />)
 
-  // then
-  expect(screen.getByRole('heading')).toBeInTheDocument()
-  expect(screen.getByRole('textbox')).toBeInTheDocument()
-})
+    // then
+    expect(screen.getByText('Username:')).toBeInTheDocument()
+  })
 
-test('should render label with colon', () => {
-  // given / when
-  render(<Input label="test-label" onChange={vi.fn()} />)
+  it('should display the current value when provided', () => {
+    // given / when
+    render(<Input label="Email" onChange={vi.fn()} value="user@example.com" />)
 
-  // then
-  expect(screen.getByText('test-label:')).toBeInTheDocument()
-})
+    // then
+    expect(screen.getByDisplayValue('user@example.com')).toBeInTheDocument()
+  })
 
-test("should set input's value", () => {
-  // given / when
-  render(<Input label="" onChange={vi.fn()} value="test-value" />)
+  it.each([
+    ['single character', 'a'],
+    ['multiple words', 'hello world'],
+    ['special characters', 'user@domain.com'],
+    ['numbers and text', 'user123'],
+  ])('should notify parent component when user types %s', async (_, inputValue) => {
+    const user = userEvent.setup()
+    const onChangeSpy = vi.fn()
 
-  // then
-  expect(screen.getByRole<HTMLInputElement>('textbox').value).toEqual('test-value')
-})
+    // given
+    render(<Input label="Test" onChange={onChangeSpy} />)
 
-test('should call onChange with expected value', async () => {
-  const user = userEvent.setup()
+    // when
+    await user.type(screen.getByRole('textbox'), inputValue)
 
-  // given
-  const onChange = vi.fn()
-  render(<Input label="" onChange={onChange} />)
+    // then
+    expect(onChangeSpy).toHaveBeenLastCalledWith(inputValue)
+  })
 
-  // when
-  await user.type(screen.getByRole('textbox'), 'test-value')
+  it('should allow clearing the input value', async () => {
+    const user = userEvent.setup()
+    const onChangeSpy = vi.fn()
 
-  // then
-  expect(onChange).toHaveBeenCalledTimes(10)
-  expect(onChange).toHaveBeenCalledWith('test-value')
+    // given
+    render(<Input label="Test" value="initial value" onChange={onChangeSpy} />)
+
+    // when
+    await user.clear(screen.getByRole('textbox'))
+
+    // then
+    expect(onChangeSpy).toHaveBeenLastCalledWith('')
+  })
 })

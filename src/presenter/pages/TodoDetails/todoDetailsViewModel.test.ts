@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import * as Router from 'react-router-dom'
-import { expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Todo } from '../../../domain/model/Todo.ts'
 import { Id, UseCaseWithParams } from '../../../domain/model/types'
 import { todoDetailsViewModel } from './todoDetailsViewModel.ts'
@@ -9,140 +9,189 @@ const getTodoUseCase = { execute: () => Promise.resolve() } as unknown as UseCas
 const updateTodoUseCase = { execute: () => Promise.resolve() } as unknown as UseCaseWithParams<Todo, Todo>
 const deleteTodoUseCase = { execute: () => Promise.resolve() } as unknown as UseCaseWithParams<void, Id>
 
-test('should set initial title and description', async () => {
-  // given / when
-  const todo = { id: '1', title: 'Todo', description: 'description' }
-  vi.spyOn(Router, 'useParams').mockReturnValue({ id: todo.id })
-  vi.spyOn(getTodoUseCase, 'execute').mockReturnValue(Promise.resolve(todo))
+const dependencies = { getTodoUseCase, updateTodoUseCase, deleteTodoUseCase }
 
-  const { result } = renderHook(() => todoDetailsViewModel({ getTodoUseCase, updateTodoUseCase, deleteTodoUseCase }))
-
-  // then
-  await waitFor(() => {
-    expect(result.current.title).toEqual(todo.title)
-    expect(result.current.description).toEqual(todo.description)
-  })
-})
-
-test('should update title and description', async () => {
-  // given
-  const { result } = renderHook(() => todoDetailsViewModel({ getTodoUseCase, updateTodoUseCase, deleteTodoUseCase }))
-
-  // ensure title and description are empty
-  expect(result.current.title).toEqual('')
-  expect(result.current.description).toEqual('')
-
-  // when
-  act(() => result.current.setTitle('test-title'))
-  act(() => result.current.setDescription('test-description'))
-
-  // then
-  await waitFor(() => {
-    expect(result.current.title).toEqual('test-title')
-    expect(result.current.description).toEqual('test-description')
-  })
-})
-
-test('should initially mark delete dialog as closed', async () => {
-  // given / when
-  const { result } = renderHook(() => todoDetailsViewModel({ getTodoUseCase, updateTodoUseCase, deleteTodoUseCase }))
-
-  // then
-  await waitFor(() => {
-    expect(result.current.isDeleteDialogOpen).toEqual(false)
-  })
-})
-
-test('should open delete dialog', async () => {
-  // given
-  const { result } = renderHook(() => todoDetailsViewModel({ getTodoUseCase, updateTodoUseCase, deleteTodoUseCase }))
-
-  // when
-  act(() => result.current.setIsDeleteDialogOpen(true))
-
-  // then
-  await waitFor(() => {
-    expect(result.current.isDeleteDialogOpen).toEqual(true)
-  })
-})
-
-test('should not call update use case if no todo is available', async () => {
-  // given
-  vi.spyOn(Router, 'useParams').mockReturnValue({ id: undefined })
-  const updateTodoSpy = vi.spyOn(updateTodoUseCase, 'execute')
-
-  const { result } = renderHook(() => todoDetailsViewModel({ getTodoUseCase, updateTodoUseCase, deleteTodoUseCase }))
-
-  // when
-  await act(() => result.current.updateTodo())
-
-  // then
-  expect(updateTodoSpy).not.toHaveBeenCalled()
-})
-
-test('should not call delete use case if no todo is available', async () => {
-  // given
-  vi.spyOn(Router, 'useParams').mockReturnValue({ id: undefined })
-  const deleteTodoSpy = vi.spyOn(deleteTodoUseCase, 'execute')
-
-  const { result } = renderHook(() => todoDetailsViewModel({ getTodoUseCase, updateTodoUseCase, deleteTodoUseCase }))
-
-  // when
-  await act(() => result.current.deleteTodo())
-
-  // then
-  expect(deleteTodoSpy).not.toHaveBeenCalled()
-})
-
-test('should update todo', async () => {
-  // given
-  const todo = { id: '1', title: 'Todo', description: 'description' }
-  const updatedTodo = { ...todo, title: 'updated-title', description: 'updated-description' }
-
-  vi.spyOn(Router, 'useParams').mockReturnValue({ id: todo.id })
-  vi.spyOn(getTodoUseCase, 'execute').mockReturnValue(Promise.resolve(todo))
-
-  const updateTodoSpy = vi.spyOn(updateTodoUseCase, 'execute')
-  updateTodoSpy.mockReturnValue(Promise.resolve(updatedTodo))
-
-  const { result } = renderHook(() => todoDetailsViewModel({ getTodoUseCase, updateTodoUseCase, deleteTodoUseCase }))
-
-  // ensure title and description are set
-  await waitFor(() => {
-    expect(result.current.title).toEqual(todo.title)
-    expect(result.current.description).toEqual(todo.description)
+describe('TodoDetailsViewModel', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.restoreAllMocks()
   })
 
-  // when
-  act(() => result.current.setTitle(updatedTodo.title))
-  act(() => result.current.setDescription(updatedTodo.description))
-  await act(() => result.current.updateTodo())
+  describe('Todo Loading', () => {
+    it('should load and display todo details when valid id is provided', async () => {
+      // given
+      const todo = { id: '1', title: 'Buy groceries', description: 'Milk and bread' }
+      vi.spyOn(Router, 'useParams').mockReturnValue({ id: todo.id })
+      vi.spyOn(getTodoUseCase, 'execute').mockReturnValue(Promise.resolve(todo))
 
-  // then
-  expect(updateTodoSpy).toHaveBeenCalledWith(updatedTodo)
-})
+      // when
+      const { result } = renderHook(() => todoDetailsViewModel(dependencies))
 
-test('should delete todo', async () => {
-  // given
-  const todo = { id: '1', title: 'Todo', description: 'description' }
+      // then
+      await waitFor(() => {
+        expect(result.current.title).toBe(todo.title)
+        expect(result.current.description).toBe(todo.description)
+      })
+    })
 
-  vi.spyOn(Router, 'useParams').mockReturnValue({ id: todo.id })
-  vi.spyOn(getTodoUseCase, 'execute').mockReturnValue(Promise.resolve(todo))
+    it('should start with empty fields when no todo id is provided', () => {
+      // given
+      vi.spyOn(Router, 'useParams').mockReturnValue({ id: undefined })
 
-  const deleteTodoSpy = vi.spyOn(deleteTodoUseCase, 'execute')
-  deleteTodoSpy.mockReturnValue(Promise.resolve())
+      // when
+      const { result } = renderHook(() => todoDetailsViewModel(dependencies))
 
-  const { result } = renderHook(() => todoDetailsViewModel({ getTodoUseCase, updateTodoUseCase, deleteTodoUseCase }))
-
-  // ensure title and description are set
-  await waitFor(() => {
-    expect(result.current.title).toEqual(todo.title)
-    expect(result.current.description).toEqual(todo.description)
+      // then
+      expect(result.current.title).toBe('')
+      expect(result.current.description).toBe('')
+    })
   })
 
-  // when
-  await act(() => result.current.deleteTodo())
+  describe('Todo Editing', () => {
+    it('should update title field when setTitle is called', () => {
+      // given
+      const { result } = renderHook(() => todoDetailsViewModel(dependencies))
 
-  // then
-  expect(deleteTodoSpy).toHaveBeenCalledWith(todo.id)
+      // when
+      act(() => result.current.setTitle('New task title'))
+
+      // then
+      expect(result.current.title).toBe('New task title')
+    })
+
+    it('should update description field when setDescription is called', () => {
+      // given
+      const { result } = renderHook(() => todoDetailsViewModel(dependencies))
+
+      // when
+      act(() => result.current.setDescription('Updated task description'))
+
+      // then
+      expect(result.current.description).toBe('Updated task description')
+    })
+
+    it('should save todo with updated fields when update is triggered', async () => {
+      // given
+      const todo = { id: '1', title: 'Original', description: 'Original desc' }
+      const updatedTitle = 'Updated title'
+      const updatedDescription = 'Updated description'
+
+      vi.spyOn(Router, 'useParams').mockReturnValue({ id: todo.id })
+      vi.spyOn(getTodoUseCase, 'execute').mockReturnValue(Promise.resolve(todo))
+
+      const updateSpy = vi.spyOn(updateTodoUseCase, 'execute').mockResolvedValue(todo)
+      const navigateSpy = vi.fn()
+      vi.spyOn(Router, 'useNavigate').mockReturnValue(navigateSpy)
+
+      const { result } = renderHook(() => todoDetailsViewModel(dependencies))
+
+      // wait for initial load
+      await waitFor(() => expect(result.current.title).toBe(todo.title))
+
+      // when
+      act(() => result.current.setTitle(updatedTitle))
+      act(() => result.current.setDescription(updatedDescription))
+      await act(() => result.current.updateTodo())
+
+      // then
+      expect(updateSpy).toHaveBeenCalledWith({
+        id: todo.id,
+        title: updatedTitle,
+        description: updatedDescription,
+      })
+      expect(navigateSpy).toHaveBeenCalledWith('/')
+    })
+  })
+
+  describe('Todo Deletion', () => {
+    it('should initialize with delete dialog closed', () => {
+      // when
+      const { result } = renderHook(() => todoDetailsViewModel(dependencies))
+
+      // then
+      expect(result.current.isDeleteDialogOpen).toBe(false)
+    })
+
+    it.each([
+      [true],
+      [false],
+    ])('should set delete dialog open state to %s', (isOpen) => {
+      // given
+      const { result } = renderHook(() => todoDetailsViewModel(dependencies))
+
+      // when
+      act(() => result.current.setIsDeleteDialogOpen(isOpen))
+
+      // then
+      expect(result.current.isDeleteDialogOpen).toBe(isOpen)
+    })
+
+    it('should delete todo and navigate away when deletion is confirmed', async () => {
+      // given
+      const todo = { id: '1', title: 'Todo to delete', description: 'Will be removed' }
+
+      vi.spyOn(Router, 'useParams').mockReturnValue({ id: todo.id })
+      vi.spyOn(getTodoUseCase, 'execute').mockReturnValue(Promise.resolve(todo))
+
+      const deleteSpy = vi.spyOn(deleteTodoUseCase, 'execute').mockResolvedValue()
+      const navigateSpy = vi.fn()
+      vi.spyOn(Router, 'useNavigate').mockReturnValue(navigateSpy)
+
+      const { result } = renderHook(() => todoDetailsViewModel(dependencies))
+
+      // wait for initial load
+      await waitFor(() => expect(result.current.title).toBe(todo.title))
+
+      // when
+      await act(() => result.current.deleteTodo())
+
+      // then
+      expect(deleteSpy).toHaveBeenCalledWith(todo.id)
+      expect(navigateSpy).toHaveBeenCalledWith('/')
+    })
+  })
+
+  describe('Prevention Logic', () => {
+    it('should prevent update when no todo id is available', async () => {
+      // given - mock useParams to return undefined BEFORE creating the hook
+      const useParamsMock = vi.spyOn(Router, 'useParams').mockReturnValue({ id: undefined })
+      vi.spyOn(Router, 'useNavigate').mockReturnValue(vi.fn())
+
+      const updateSpy = vi.fn()
+      const testDependencies = {
+        getTodoUseCase: { execute: vi.fn() } as UseCaseWithParams<Todo, Id>,
+        updateTodoUseCase: { execute: updateSpy } as UseCaseWithParams<Todo, Todo>,
+        deleteTodoUseCase: { execute: vi.fn() } as UseCaseWithParams<void, Id>,
+      }
+
+      // when
+      const { result } = renderHook(() => todoDetailsViewModel(testDependencies))
+      await act(() => result.current.updateTodo())
+
+      // then
+      expect(useParamsMock).toHaveBeenCalled()
+      expect(updateSpy).not.toHaveBeenCalled()
+    })
+
+    it('should prevent deletion when no todo id is available', async () => {
+      // given - mock useParams to return undefined BEFORE creating the hook
+      const useParamsMock = vi.spyOn(Router, 'useParams').mockReturnValue({ id: undefined })
+      vi.spyOn(Router, 'useNavigate').mockReturnValue(vi.fn())
+
+      const deleteSpy = vi.fn()
+      const testDependencies = {
+        getTodoUseCase: { execute: vi.fn() } as UseCaseWithParams<Todo, Id>,
+        updateTodoUseCase: { execute: vi.fn() } as UseCaseWithParams<Todo, Todo>,
+        deleteTodoUseCase: { execute: deleteSpy } as UseCaseWithParams<void, Id>,
+      }
+
+      // when
+      const { result } = renderHook(() => todoDetailsViewModel(testDependencies))
+      await act(() => result.current.deleteTodo())
+
+      // then
+      expect(useParamsMock).toHaveBeenCalled()
+      expect(deleteSpy).not.toHaveBeenCalled()
+    })
+  })
 })

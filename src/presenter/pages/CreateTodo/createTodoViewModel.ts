@@ -20,5 +20,5 @@ export const createTodoViewModel = ({ createTodoUseCase }: Dependencies) => {
     navigate('/')
   }
 
-  return { setTitle, setDescription, createTodo }
+  return { title, description, setTitle, setDescription, createTodo }
 }

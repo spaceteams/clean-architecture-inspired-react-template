@@ -1,33 +1,39 @@
-import { expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ITodoRepository } from '../../repository/ITodoRepository.ts'
 import { getTodosUseCase } from './getTodosUseCase.ts'
 
-const repository = { get: vi.fn() } as unknown as ITodoRepository
-const useCase = getTodosUseCase({ todoRepository: repository })
+describe('GetTodosUseCase', () => {
+  const mockGet = vi.fn()
+  const mockRepository = { get: mockGet } as unknown as ITodoRepository
+  const useCase = getTodosUseCase({ todoRepository: mockRepository })
 
-test('should return a list of todo', async () => {
-  // given
-  const todos = [
-    { id: '1', title: 'Todo 1', description: 'description 1' },
-    { id: '2', title: 'Todo 2', description: 'description 2' },
-  ]
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
 
-  const getSpy = vi.spyOn(repository, 'get')
-  getSpy.mockReturnValueOnce(Promise.resolve(todos))
+  it('should retrieve all todos from repository', async () => {
+    // given
+    const expectedTodos = [
+      { id: '1', title: 'Todo 1', description: 'description 1' },
+      { id: '2', title: 'Todo 2', description: 'description 2' },
+    ]
+    mockGet.mockResolvedValueOnce(expectedTodos)
 
-  // when
-  const result = await useCase.execute()
+    // when
+    const result = await useCase.execute()
 
-  // then
-  expect(result).toEqual(todos)
-  expect(getSpy).toHaveBeenCalled()
-})
+    // then
+    expect(result).toEqual(expectedTodos)
+    expect(mockGet).toHaveBeenCalledOnce()
+  })
 
-test('should return error if fetching the todos fails', async () => {
-  // given
-  const getSpy = vi.spyOn(repository, 'get')
-  getSpy.mockReturnValueOnce(Promise.reject(Error('expected error')))
+  it('should propagate repository errors when todo retrieval fails', async () => {
+    // given
+    const expectedError = new Error('Repository connection failed')
+    mockGet.mockRejectedValueOnce(expectedError)
 
-  // when / then
-  await expect(useCase.execute()).rejects.toThrow('expected error')
+    // when / then
+    await expect(useCase.execute()).rejects.toThrow('Repository connection failed')
+    expect(mockGet).toHaveBeenCalledOnce()
+  })
 })

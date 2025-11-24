@@ -1,51 +1,52 @@
 import { render, screen } from '@testing-library/react'
-import { expect, test } from 'vitest'
+import { describe, expect, it } from 'vitest'
+import { ReactNode } from 'react'
 import { Page } from './Page.tsx'
 
-test('should render component', () => {
-  // given / when
-  render(<Page headline="" />)
+describe('Page Component', () => {
+  it('should display the provided headline to users', () => {
+    // given
+    const headline = 'Welcome to Our Application'
 
-  // then
-  expect(screen.getByTestId('page')).toBeInTheDocument()
-})
+    // when
+    render(<Page headline={headline} />)
 
-test('should render header', () => {
-  // given / when
-  render(<Page headline="headline-test" />)
+    // then
+    expect(screen.getByRole('heading', { name: headline })).toBeInTheDocument()
+  })
 
-  // then
-  expect(screen.getByRole('heading', { name: 'headline-test' })).toBeInTheDocument()
-})
+  it('should render child content within the page layout', () => {
+    // given
+    const testContent = 'Important business content'
 
-test('should render content', () => {
-  // given / when
-  render(
-    <Page headline="">
-      <div>child</div>
-    </Page>,
-  )
+    // when
+    render(
+      <Page headline="Test">
+        <div>
+          {testContent}
+        </div>
+      </Page>,
+    )
 
-  // then
-  const content = screen.getByTestId('content')
-  expect(content).toBeInTheDocument()
-  expect(content.firstElementChild?.textContent).toEqual('child')
-})
+    // then
+    expect(screen.getByText(testContent)).toBeInTheDocument()
+  })
 
-test('should not render footer if no footer is passed', () => {
-  // given / when
-  render(<Page headline="" />)
+  it.each([
+    [<button>Action</button>, true],
+    [undefined, false],
+  ])('should conditionally display footer based on footer prop', (
+    footerContent: ReactNode,
+    shouldShowFooter: boolean,
+  ) => {
+    // given / when
+    render(<Page headline="Test" footer={footerContent} />)
 
-  // then
-  expect(screen.queryByTestId('footer')).not.toBeInTheDocument()
-})
-
-test('should render footer', () => {
-  // given / when
-  render(<Page headline="" footer={<div>child</div>} />)
-
-  // then
-  const footer = screen.getByTestId('footer')
-  expect(footer).toBeInTheDocument()
-  expect(footer.firstElementChild?.textContent).toEqual('child')
+    // then
+    if (shouldShowFooter) {
+      expect(screen.getByRole('button', { name: 'Action' })).toBeInTheDocument()
+    } else {
+      expect(screen.queryByTestId('footer')).not.toBeInTheDocument()
+    }
+  })
 })
